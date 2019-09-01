@@ -75,8 +75,45 @@ async function getCoursesByRegExp() {
   console.log(courses);
 }
 
+// UPDATE by query first approach:
+// 1) Query for ID, find()    2) Update properties   3) save()
+async function updateById1(id) {
+  const course = await Course.findById(id);
+  if (!course) return;
+
+  course.author = "John";
+  course.isPublished = false;
+
+  const result = await course.save();
+  console.log(result);
+}
+
+// UPDATE using MongoDB update operator approach:
+// 1) Update directly 2) Optionally get updated document
+async function updateById2(id) {
+  const course = await Course.findByIdAndUpdate(
+    id,
+    {
+      $set: { author: "Lily", isPublished: true }
+    },
+    { new: true } //returns new updated document object
+  );
+  console.log(course);
+}
+
+// DELETE
+// 1) Course.deleteOne({_id:id})   2) Course.deleteMany({_id:id})
+// 3) Course.findByIdAndDelete(id)  -- Returns deleted document Object
+async function deleteById(id) {
+  const course = await Course.findByIdAndDelete(id);
+  console.log(course);
+}
+
 //createCourse();
 //getCourses();
 //getCoursesByFiltering();
 //getCoursesByLogicalOp();
-getCoursesByRegExp();
+//getCoursesByRegExp();
+// updateById1("5d6a212fafb66307bc453947");
+// updateById2("5d6a212fafb66307bc453947");
+deleteById("5d6a212fafb66307bc453947");
