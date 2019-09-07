@@ -12,7 +12,8 @@ const courseSchema = mongoose.Schema({
     type: String,
     required: true, // 'required' Validator
     minlength: 5,
-    maxlength: 20
+    maxlength: 20,
+    uppercase: true // 'uppercase', 'lowercase' options for String type
     //match:/patern/
   },
   author: String,
@@ -36,7 +37,9 @@ const courseSchema = mongoose.Schema({
       function() {
         return this.isPublished;
       }
-    }
+    },
+    get: v => Math.round(v), // will get value from MongoDB after rounding it
+    set: v => Math.round(v) // will round it before saving it in MongoDB
   }
 });
 
