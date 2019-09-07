@@ -1,34 +1,66 @@
 const mongoose = require("mongoose");
 
-// 1. Connect to database
+// 1. CONNECT TO DATABASE
 mongoose
   .connect("mongodb://localhost/playground", { useNewUrlParser: true })
   .then(() => console.log("Connected to MongoDB..."))
   .catch(err => console.log("Could not connect to MongoDB..", err));
 
-// 2. Schema
+// 2. SCHEMA
 const courseSchema = mongoose.Schema({
-  name: String,
+  name: {
+    type: String,
+    required: true, // 'required' Validator
+    minlength: 5,
+    maxlength: 20
+    //match:/patern/
+  },
   author: String,
-  tags: [String],
+  tags: {
+    type: [String],
+    enum: ["web", "front-end", "back-end"], // 'enum' Validator
+    //Custom Validator
+    validate: {
+      validator: function(v) {
+        return v.length > 0;
+      },
+      message: "Course should have atleast one tag"
+    }
+  },
   date: { type: Date, default: Date.now },
-  isPublished: Boolean
+  isPublished: Boolean,
+  price: {
+    type: Number,
+    required: {
+      // using function. Arrow function don't work because this will access different object.
+      function() {
+        return this.isPublished;
+      }
+    }
+  }
 });
 
-// 3. Model
+// 3. MODEL for schema
 const Course = mongoose.model("Course", courseSchema); // (CollectionName,Schema) //Class (Note: Mongoose automatically looks for the plural, lowercased version of your model name)
 
 async function createCourse() {
-  // 4. Create object of model class
+  // 4. CREATE OBJECT OF MODEL CLASS
   const course = new Course({
-    name: "Chat Bot",
+    name: "Mongoose",
     author: "Sushmitha",
-    tags: ["chat-bot", "application"],
-    isPublished: true
+    tags: ["back-end"],
+    isPublished: true,
+    price: 15
   });
 
-  const result = await course.save();
-  console.log(result);
+  //Catch and display the validation error
+  try {
+    const result = await course.save();
+    console.log(result);
+  } catch (ex) {
+    // console.log("Exception: ", ex.message);
+    for (i in ex.errors) console.log(ex.errors[i].message); //see 'errors' object for more info
+  }
 }
 
 async function getCourses() {
@@ -109,11 +141,12 @@ async function deleteById(id) {
   console.log(course);
 }
 
-//createCourse();
+// function calls -
+createCourse();
 //getCourses();
 //getCoursesByFiltering();
 //getCoursesByLogicalOp();
 //getCoursesByRegExp();
 // updateById1("5d6a212fafb66307bc453947");
 // updateById2("5d6a212fafb66307bc453947");
-deleteById("5d6a212fafb66307bc453947");
+//deleteById("5d6a212fafb66307bc453947");
